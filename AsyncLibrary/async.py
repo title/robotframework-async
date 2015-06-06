@@ -1,9 +1,3 @@
-import sys
-import os
-import time
-from robot.libraries.BuiltIn import BuiltIn
-from robot.output import librarylogger as log
-from robot.running import Keyword
 from robot.running.context import EXECUTION_CONTEXTS
 
 class AsyncLibrary:
@@ -23,7 +17,11 @@ class AsyncLibrary:
     def async_get(self, handle):
         ''' Blocks until the thread created by async_run returns '''
         assert handle in self._thread_pool, 'Invalid async call handle'
-        result = self._thread_pool[handle].result_queue.get()
+        t = self._thread_pool[handle]
+        if t.isAlive():
+            result = t.result_queue.get()
+        else:
+            result = None if t.result_queue.empty() else t.result_queue.get_nowait()
         del self._thread_pool[handle]
         return result
 
