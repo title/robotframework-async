@@ -38,7 +38,8 @@ class AsyncLibrary:
         def wrapped_f(q, *args, **kwargs):
             ''' Calls the decorated function and puts the result in a queue '''
             f = self._get_handler_from_keyword(keyword)
-            ret = f.run(EXECUTION_CONTEXTS.current, args)
+            kwargsTuple = tuple('%s=%s' % (key, kwargs[key]) for key in kwargs.keys())
+            ret = f.run(EXECUTION_CONTEXTS.current, args + kwargsTuple)
             q.put(ret)
 
         q = Queue.Queue()
